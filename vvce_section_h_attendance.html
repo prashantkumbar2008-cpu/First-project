@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Section H Attendance — VVCE CSE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDF1F7;
+    --surface:#FFFFFF;
+    --ink:#16233F;
+    --ink-soft:#4B5875;
+    --ink-faint:#8B96AC;
+    --line:#D7DEE9;
+    --present:#1F9D55;
+    --present-soft:#E4F5EA;
+    --absent:#D14343;
+    --absent-soft:#FBE7E7;
+    --warn:#B9721F;
+    --warn-soft:#FBEEDD;
+    --accent:#2A4A8C;
+    --accent-soft:#E6ECF7;
+    --radius:14px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings:'tnum' 1;
+    font-variant-numeric: tabular-nums;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:560px; margin:0 auto; padding:22px 18px 60px; }
+
+  /* ---- header ---- */
+  .meta-line{ color:var(--ink-faint); font-size:12.5px; letter-spacing:.02em; margin-bottom:6px; }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(24px,7vw,30px);
+    margin:0 0 4px;
+    color:var(--ink);
+  }
+  .subtitle{ color:var(--ink-soft); font-size:13.5px; margin:0 0 20px; }
+
+  /* ---- storage banner ---- */
+  #storage-banner{
+    display:none;
+    background:var(--warn-soft);
+    color:var(--warn);
+    border:1px solid #ecd3ac;
+    border-radius:10px;
+    padding:9px 12px;
+    font-size:12.5px;
+    margin-bottom:16px;
+  }
+
+  /* ---- hero ---- */
+  .hero{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:0 1px 2px rgba(22,35,63,0.06);
+    padding:22px 20px 20px;
+    margin-bottom:22px;
+  }
+  .hero-top{ display:flex; align-items:baseline; gap:10px; margin-bottom:2px; }
+  .hero-number{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(46px,14vw,58px);
+    line-height:1;
+    color:var(--ink);
+  }
+  .hero-number.good{ color:var(--present); }
+  .hero-number.warn{ color:var(--warn); }
+  .hero-number.bad{ color:var(--absent); }
+  .hero-label{ color:var(--ink-soft); font-size:13.5px; margin-bottom:16px; }
+  .bar-track{ position:relative; height:10px; background:var(--line); border-radius:6px; margin-bottom:6px; }
+  .bar-fill{ position:absolute; left:0; top:0; height:100%; border-radius:6px; transition:width .5s ease, background .3s ease; }
+  .bar-marker{ position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--ink); opacity:.35; left:75%; }
+  .bar-marker-label{ position:absolute; left:75%; transform:translateX(-50%); top:14px; font-size:10.5px; color:var(--ink-faint); }
+  .hero-hint{ margin-top:22px; font-size:13.5px; color:var(--ink-soft); }
+  .hero-hint strong{ color:var(--ink); }
+
+  /* ---- date nav ---- */
+  .datenav{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px; }
+  .nav-btn{
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    font-size:16px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .nav-btn:active{ background:var(--accent-soft); }
+  .date-center{ text-align:center; flex:1; position:relative; }
+  .date-label{ font-weight:600; font-size:15.5px; color:var(--ink); }
+  .date-input{
+    position:absolute; inset:0; opacity:0; cursor:pointer; border:none; width:100%; height:100%;
+  }
+  .today-pill{
+    display:inline-block; margin-top:3px; font-size:11.5px; color:var(--accent);
+    background:var(--accent-soft); border-radius:20px; padding:1px 9px; cursor:pointer; border:none;
+  }
+  section.block{ margin-bottom:26px; }
+  h2{
+    font-family:'Fraunces', serif; font-weight:600; font-size:19px; color:var(--ink);
+    margin:0 0 10px;
+  }
+
+  /* ---- class list rows ---- */
+  .row{ display:grid; grid-template-columns:70px 1fr; gap:10px; padding:14px 2px; border-bottom:1px solid var(--line); }
+  .row:last-child{ border-bottom:none; }
+  .row-time{ font-size:12px; color:var(--ink-faint); padding-top:2px; }
+  .row-code{
+    display:inline-block; font-size:11px; font-weight:600; color:var(--accent);
+    background:var(--accent-soft); border-radius:5px; padding:1px 6px; margin-bottom:4px;
+  }
+  .row-name{ font-size:15px; font-weight:600; color:var(--ink); margin-bottom:2px; }
+  .row-sub{ font-size:12px; color:var(--ink-faint); margin-bottom:10px; }
+  .btnrow{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .status-btn{
+    border-radius:20px; padding:6px 14px; font-size:13px; font-weight:600;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-soft); cursor:pointer;
+  }
+  .status-btn[aria-pressed="true"].present{ background:var(--present-soft); border-color:var(--present); color:var(--present); }
+  .status-btn[aria-pressed="true"].absent{ background:var(--absent-soft); border-color:var(--absent); color:var(--absent); }
+  .clear-link{ font-size:12px; color:var(--ink-faint); text-decoration:underline; cursor:pointer; background:none; border:none; padding:4px; }
+  .pulse{ animation:pulse .28s ease; }
+  @keyframes pulse{ 0%{transform:scale(1);} 45%{transform:scale(1.06);} 100%{transform:scale(1);} }
+
+  .empty-state{ color:var(--ink-soft); font-size:14px; padding:18px 2px; }
+
+  /* ---- ledger table ---- */
+  table{ width:100%; border-collapse:collapse; }
+  th{ text-align:left; font-size:11.5px; color:var(--ink-faint); font-weight:600; padding:0 6px 8px; border-bottom:1px solid var(--line); }
+  th.num, td.num{ text-align:right; }
+  td{ padding:11px 6px; border-bottom:1px solid var(--line); vertical-align:top; font-size:13.5px; }
+  tr:last-child td{ border-bottom:none; }
+  .subj-name{ font-weight:600; color:var(--ink); font-size:13.5px; }
+  .subj-code{ font-size:11px; color:var(--ink-faint); }
+  .pct{ font-weight:700; }
+  .pct.good{ color:var(--present); }
+  .pct.warn{ color:var(--warn); }
+  .pct.bad{ color:var(--absent); }
+  .note{ font-size:12px; color:var(--ink-faint); }
+
+  /* ---- weekly reference ---- */
+  details{ background:var(--surface); border:1px solid var(--line); border-radius:12px; margin-bottom:8px; overflow:hidden; }
+  summary{
+    cursor:pointer; list-style:none; padding:13px 16px; font-weight:600; font-size:14.5px;
+    display:flex; justify-content:space-between; align-items:center; color:var(--ink);
+  }
+  summary::-webkit-details-marker{ display:none; }
+  summary .count{ font-weight:400; color:var(--ink-faint); font-size:12.5px; }
+  .ref-row{ display:grid; grid-template-columns:70px 1fr; gap:10px; padding:11px 16px; border-top:1px solid var(--line); }
+  .ref-name{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  .ref-sub{ font-size:11.5px; color:var(--ink-faint); }
+  .lab-tag{ font-size:10px; font-weight:600; color:var(--accent); border:1px solid var(--accent); border-radius:5px; padding:0 5px; margin-left:6px; vertical-align:middle; }
+
+  footer{ text-align:center; margin-top:30px; }
+  footer p{ font-size:12px; color:var(--ink-faint); margin:0 0 8px; }
+  .reset-btn{ background:none; border:none; color:var(--ink-faint); font-size:12px; text-decoration:underline; cursor:pointer; }
+
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){ .pulse{ animation:none; } .bar-fill{ transition:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="meta-line">VVCE · CSE · Section H</div>
+  <h1>My Attendance Register</h1>
+  <p class="subtitle">Odd Semester 2026&ndash;27 (C&#8209;Cycle) &middot; effective 07 Sep 2026</p>
+
+  <div id="storage-banner">Your browser is blocking saved data (e.g. private/incognito mode) &mdash; marks will only last for this tab.</div>
+
+  <div class="hero">
+    <div class="hero-top">
+      <div class="hero-number" id="hero-number">&mdash;</div>
+    </div>
+    <div class="hero-label">overall attendance across all subjects</div>
+    <div class="bar-track">
+      <div class="bar-fill" id="bar-fill" style="width:0%"></div>
+      <div class="bar-marker"></div>
+      <div class="bar-marker-label">75% (VTU minimum)</div>
+    </div>
+    <div class="hero-hint" id="hero-hint" style="margin-top:20px;">Mark your first class below to see where you stand.</div>
+  </div>
+
+  <section class="block">
+    <div class="datenav">
+      <button class="nav-btn" id="prev-btn" aria-label="Previous day">&#8249;</button>
+      <div class="date-center">
+        <div class="date-label" id="date-label">&nbsp;</div>
+        <button class="today-pill" id="today-btn" style="display:none;">Jump to today</button>
+        <input type="date" class="date-input" id="date-input" aria-label="Choose a date" />
+      </div>
+      <button class="nav-btn" id="next-btn" aria-label="Next day">&#8250;</button>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 id="list-heading">Today's classes</h2>
+    <div id="class-list"></div>
+  </section>
+
+  <section class="block">
+    <h2>Attendance ledger</h2>
+    <table>
+      <thead>
+        <tr><th>Subject</th><th class="num">Present</th><th class="num">%</th><th>Note</th></tr>
+      </thead>
+      <tbody id="stats-body"></tbody>
+    </table>
+  </section>
+
+  <section class="block">
+    <h2>Full weekly timetable</h2>
+    <div id="week-ref"></div>
+  </section>
+
+  <footer>
+    <p>Attendance is saved automatically on this device.</p>
+    <button class="reset-btn" id="reset-btn">Reset all attendance data</button>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+
+  var COURSE_NAMES = {
+    '1BMATS101':  'Applied Mathematics \u2013 I for CSE Stream',
+    '1BCHES102':  'Applied Chemistry for CSE Stream',
+    '1BPICS103':  'Programming in C',
+    '1BAIAK104':  'Introduction to AI & its Applications',
+    '1BIECK105':  'Introduction to Electronics Engineering',
+    '1BKSKK110':  'Samskruthika Kannada',
+    '1BKBKK110':  'Balake Kannada',
+    '1BPICSL107': 'Programming in C Lab',
+    '1BCHESL106': 'Applied Chemistry Lab',
+    '1BENGK108':  'Communication Skills - I',
+    '1BDTTK109':  'Design Thinking and Tinkering Lab'
+  };
+
+  var CODE_ORDER = ['1BMATS101','1BCHES102','1BPICS103','1BAIAK104','1BIECK105',
+                     '1BKSKK110','1BKBKK110','1BPICSL107','1BCHESL106','1BENGK108','1BDTTK109'];
+
+  var SCHEDULE = {
+    Monday: [
+      { time:'8:00 \u2013 9:00 AM',   code:'1BCHES102',  faculty:'Prof. Manasa C',        room:'M-117' },
+      { time:'9:00 \u2013 10:00 AM',  code:'1BKSKK110',  faculty:'Prof. Ashwini H B',      room:'M-117' },
+      { time:'10:30 AM \u2013 12:30 PM', code:'1BMATS101', faculty:'Dr. Veeranayaka T N', room:'A-212', lab:true },
+      { time:'1:30 \u2013 3:30 PM',   code:'1BPICSL107', faculty:'Prof. Dayananda K J',   room:'A-212', lab:true },
+      { time:'3:30 \u2013 4:30 PM',   code:'1BKBKK110',  faculty:'Prof. Ashwini H B',      room:'M-115' }
+    ],
+    Tuesday: [
+      { time:'8:00 \u2013 9:00 AM',   code:'1BPICS103',  faculty:'Prof. Dayananda K J',    room:'M-117' },
+      { time:'9:00 \u2013 10:00 AM',  code:'1BMATS101',  faculty:'Dr. Veeranayaka T N',    room:'M-117' },
+      { time:'10:30 \u2013 11:30 AM', code:'1BIECK105',  faculty:'Dr. Chaitanya D J',      room:'M-117' },
+      { time:'11:30 AM \u2013 12:30 PM', code:'1BAIAK104', faculty:'Prof. Kayvashree G',  room:'M-117' },
+      { time:'1:30 \u2013 2:30 PM',   code:'1BCHES102',  faculty:'Prof. Manasa C',         room:'M-117' }
+    ],
+    Wednesday: [
+      { time:'9:00 \u2013 10:00 AM',  code:'1BCHES102',  faculty:'Prof. Manasa C',         room:'M-117' },
+      { time:'10:30 AM \u2013 12:30 PM', code:'1BENGK108', faculty:'Prof. Niranjan Sarja / Prof. Nanditha Muddappa', room:'A-002 / A-004', lab:true },
+      { time:'1:30 \u2013 2:30 PM',   code:'1BMATS101',  faculty:'Dr. Veeranayaka T N',    room:'M-117' },
+      { time:'2:30 \u2013 3:30 PM',   code:'1BPICS103',  faculty:'Prof. Dayananda K J',    room:'M-117' }
+    ],
+    Thursday: [
+      { time:'8:00 \u2013 10:00 AM',  code:'1BCHESL106', faculty:'Dr. Sowmya P T / Prof. C Manasa / Ms. Ameena Kausar', room:'G-201 / 202 / 003', lab:true },
+      { time:'10:30 \u2013 11:30 AM', code:'1BIECK105',  faculty:'Dr. Chaitanya D J',      room:'M-117' },
+      { time:'11:30 AM \u2013 12:30 PM', code:'1BMATS101', faculty:'Dr. Veeranayaka T N', room:'M-117' }
+    ],
+    Friday: [
+      { time:'8:00 \u2013 9:00 AM',   code:'1BIECK105',  faculty:'Dr. Chaitanya D J',      room:'M-117' },
+      { time:'9:00 \u2013 10:00 AM',  code:'1BAIAK104',  faculty:'Prof. Kayvashree G',     room:'M-117' },
+      { time:'10:30 \u2013 11:30 AM', code:'1BMATS101',  faculty:'Dr. Veeranayaka T N',    room:'M-117' },
+      { time:'11:30 AM \u2013 12:30 PM', code:'1BPICS103', faculty:'Prof. Dayananda K J',  room:'M-117' },
+      { time:'1:30 \u2013 2:30 PM',   code:'1BDTTK109',  faculty:'Prof. Manasa M R',       room:'M-402', lab:true }
+    ]
+  };
+
+  var WEEKDAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var STORAGE_KEY = 'vvce-h-attendance';
+
+  var attendance = {};
+  var currentDate = new Date();
+  var storageOk = true;
+
+  function isoDate(d){
+    var y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return y + '-' + m + '-' + day;
+  }
+  function parseIso(str){
+    var parts = str.split('-').map(Number);
+    return new Date(parts[0], parts[1]-1, parts[2]);
+  }
+  function sameDate(a,b){ return isoDate(a) === isoDate(b); }
+  function dayNameOf(d){
+    var n = d.getDay();
+    if (n === 0 || n === 6) return null;
+    return WEEKDAYS_FULL[n];
+  }
+  function formatLabel(d){
+    return WEEKDAYS_FULL[d.getDay()].slice(0,3) + ', ' + String(d.getDate()).padStart(2,'0') + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function canUseLocalStorage(){
+    try {
+      var k = '__vvce_test__';
+      localStorage.setItem(k, '1');
+      localStorage.removeItem(k);
+      return true;
+    } catch(e){
+      return false;
+    }
+  }
+
+  function persist(){
+    if (!storageOk) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(attendance));
+    } catch(e){
+      console.warn('Could not save attendance:', e);
+    }
+  }
+
+  function loadAttendance(){
+    storageOk = canUseLocalStorage();
+    if (storageOk){
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) attendance = JSON.parse(raw);
+      } catch(e){
+        storageOk = false;
+      }
+    }
+    document.getElementById('storage-banner').style.display = storageOk ? 'none' : 'block';
+  }
+
+  function setStatus(dateStr, idx, status){
+    if (!attendance[dateStr]) attendance[dateStr] = [];
+    attendance[dateStr][idx] = status;
+    persist();
+    renderClassList();
+    renderStatsTable();
+    renderHero();
+  }
+
+  function computeOverall(){
+    var present = 0, total = 0;
+    for (var dateStr in attendance){
+      var day = dayNameOf(parseIso(dateStr));
+      var sched = day ? SCHEDULE[day] : null;
+      if (!sched) continue;
+      var arr = attendance[dateStr];
+      for (var i=0;i<arr.length;i++){
+        var st = arr[i];
+        if (st === 'present' || st === 'absent'){
+          if (!sched[i]) continue;
+          total++;
+          if (st === 'present') present++;
+        }
+      }
+    }
+    return { present: present, total: total };
+  }
+
+  function computePerSubject(){
+    var stats = {};
+    CODE_ORDER.forEach(function(code){ stats[code] = { present:0, total:0 }; });
+    for (var dateStr in attendance){
+      var day = dayNameOf(parseIso(dateStr));
+      var sched = day ? SCHEDULE[day] : null;
+      if (!sched) continue;
+      var arr = attendance[dateStr];
+      for (var i=0;i<arr.length;i++){
+        var st = arr[i];
+        if (st !== 'present' && st !== 'absent') continue;
+        var cls = sched[i];
+        if (!cls || !stats[cls.code]) continue;
+        stats[cls.code].total++;
+        if (st === 'present') stats[cls.code].present++;
+      }
+    }
+    return stats;
+  }
+
+  function bunkHint(present, total){
+    if (total === 0) return { text:'No classes logged yet', tone:'' };
+    var pct = present/total*100;
+    if (pct >= 75){
+      var y = Math.floor(present/0.75 - total);
+      if (y > 0) return { text:'skip ' + y + ' & stay safe', tone:'good' };
+      return { text:'right at the line', tone:'warn' };
+    } else {
+      var xRaw = (0.75*total - present) / 0.25;
+      var x = Math.ceil(xRaw);
+      return { text:'need ' + x + ' more', tone:'bad' };
+    }
+  }
+
+  function toneClass(pct){
+    if (pct >= 75) return 'good';
+    if (pct >= 60) return 'warn';
+    return 'bad';
+  }
+
+  function renderHero(){
+    var o = computeOverall();
+    var numberEl = document.getElementById('hero-number');
+    var fillEl = document.getElementById('bar-fill');
+    var hintEl = document.getElementById('hero-hint');
+    if (o.total === 0){
+      numberEl.textContent = '\u2014';
+      numberEl.className = 'hero-number';
+      fillEl.style.width = '0%';
+      hintEl.innerHTML = 'Mark your first class below to see where you stand.';
+      return;
+    }
+    var pct = Math.round(o.present/o.total*100);
+    var tone = toneClass(pct);
+    numberEl.textContent = pct + '%';
+    numberEl.className = 'hero-number ' + tone;
+    fillEl.style.width = Math.min(pct,100) + '%';
+    fillEl.style.background = tone === 'good' ? 'var(--present)' : (tone === 'warn' ? 'var(--warn)' : 'var(--absent)');
+    var h = bunkHint(o.present, o.total);
+    hintEl.innerHTML = '<strong>' + o.present + ' / ' + o.total + '</strong> classes attended overall &mdash; ' + h.text + '.';
+  }
+
+  function renderStatsTable(){
+    var stats = computePerSubject();
+    var body = document.getElementById('stats-body');
+    var rows = CODE_ORDER.map(function(code){
+      var s = stats[code];
+      var name = COURSE_NAMES[code];
+      var pctText = '\u2014', pctClass = '';
+      if (s.total > 0){
+        var pct = Math.round(s.present/s.total*100);
+        pctText = pct + '%';
+        pctClass = toneClass(pct);
+      }
+      var h = bunkHint(s.present, s.total);
+      return '<tr>' +
+        '<td><div class="subj-name">' + name + '</div><div class="subj-code">' + code + '</div></td>' +
+        '<td class="num">' + s.present + '/' + s.total + '</td>' +
+        '<td class="num pct ' + pctClass + '">' + pctText + '</td>' +
+        '<td class="note">' + h.text + '</td>' +
+      '</tr>';
+    }).join('');
+    body.innerHTML = rows;
+  }
+
+  function renderClassList(){
+    var dateStr = isoDate(currentDate);
+    var day = dayNameOf(currentDate);
+    var listEl = document.getElementById('class-list');
+    var heading = document.getElementById('list-heading');
+    var isToday = sameDate(currentDate, new Date());
+    heading.textContent = isToday ? "Today's classes" : formatLabel(currentDate) + "'s classes";
+
+    if (!day){
+      listEl.innerHTML = '<div class="empty-state">No classes scheduled &mdash; enjoy the day off.</div>';
+      return;
+    }
+    var sched = SCHEDULE[day];
+    var marks = attendance[dateStr] || [];
+    listEl.innerHTML = sched.map(function(cls, idx){
+      var status = marks[idx] || null;
+      var name = COURSE_NAMES[cls.code];
+      return '<div class="row">' +
+        '<div class="row-time">' + cls.time + '</div>' +
+        '<div>' +
+          '<span class="row-code">' + cls.code + (cls.lab ? ' \u00b7 Lab' : '') + '</span>' +
+          '<div class="row-name">' + name + '</div>' +
+          '<div class="row-sub">' + cls.faculty + ' \u00b7 ' + cls.room + '</div>' +
+          '<div class="btnrow">' +
+            '<button class="status-btn present" aria-pressed="' + (status==='present') + '" data-idx="' + idx + '" data-action="present">Present</button>' +
+            '<button class="status-btn absent" aria-pressed="' + (status==='absent') + '" data-idx="' + idx + '" data-action="absent">Absent</button>' +
+            (status ? '<button class="clear-link" data-idx="' + idx + '" data-action="clear">clear</button>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderDateNav(){
+    document.getElementById('date-label').textContent = formatLabel(currentDate);
+    document.getElementById('date-input').value = isoDate(currentDate);
+    var isToday = sameDate(currentDate, new Date());
+    document.getElementById('today-btn').style.display = isToday ? 'none' : 'inline-block';
+  }
+
+  function renderWeekReference(){
+    var container = document.getElementById('week-ref');
+    var days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+    container.innerHTML = days.map(function(day, i){
+      var sched = SCHEDULE[day];
+      var rows = sched.map(function(cls){
+        var name = COURSE_NAMES[cls.code];
+        return '<div class="ref-row">' +
+          '<div class="row-time">' + cls.time + '</div>' +
+          '<div>' +
+            '<div class="ref-name">' + cls.code + ' \u2013 ' + name + (cls.lab ? '<span class="lab-tag">LAB</span>' : '') + '</div>' +
+            '<div class="ref-sub">' + cls.faculty + ' \u00b7 ' + cls.room + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      return '<details' + (i===0 ? ' open' : '') + '>' +
+        '<summary>' + day + ' <span class="count">' + sched.length + ' classes</span></summary>' +
+        rows +
+      '</details>';
+    }).join('');
+  }
+
+  function renderAll(){
+    renderDateNav();
+    renderClassList();
+    renderStatsTable();
+    renderHero();
+  }
+
+  // ---- events ----
+  document.getElementById('prev-btn').addEventListener('click', function(){
+    currentDate.setDate(currentDate.getDate() - 1);
+    renderAll();
+  });
+  document.getElementById('next-btn').addEventListener('click', function(){
+    currentDate.setDate(currentDate.getDate() + 1);
+    renderAll();
+  });
+  document.getElementById('today-btn').addEventListener('click', function(){
+    currentDate = new Date();
+    renderAll();
+  });
+  document.getElementById('date-input').addEventListener('change', function(e){
+    if (e.target.value) currentDate = parseIso(e.target.value);
+    renderAll();
+  });
+
+  document.getElementById('class-list').addEventListener('click', function(e){
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var idx = Number(btn.getAttribute('data-idx'));
+    var action = btn.getAttribute('data-action');
+    var dateStr = isoDate(currentDate);
+    if (action === 'clear'){
+      setStatus(dateStr, idx, null);
+      return;
+    }
+    setStatus(dateStr, idx, action);
+    var list = document.getElementById('class-list');
+    var newBtn = list.querySelector('.status-btn.' + action + '[data-idx="' + idx + '"]');
+    if (newBtn){
+      newBtn.classList.add('pulse');
+      setTimeout(function(){ newBtn.classList.remove('pulse'); }, 300);
+    }
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    if (confirm('Clear all saved attendance data? This cannot be undone.')){
+      attendance = {};
+      persist();
+      renderAll();
+    }
+  });
+
+  // ---- init ----
+  loadAttendance();
+  renderWeekReference();
+  renderAll();
+
+})();
+</script>
+</body>
+</html>
